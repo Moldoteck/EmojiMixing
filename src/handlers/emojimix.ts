@@ -29,6 +29,36 @@ function processDeca(decaArray) {
 
   return decaArray
 }
+
+export function delay(scnd: number) {
+  return new Promise(resolve => setTimeout(resolve, scnd * 1000));
+}
+
+export async function customSendDocument(emojiMix: string, context) {
+  let result_msg = undefined
+  try {
+    result_msg = await context.telegram.sendDocument(process.env.CHATID,
+      {
+        url: emojiMix,
+        filename: 'sticker-gen.webp'
+      },
+      { disable_notification: true })
+  } catch (err) {
+    let msg = '' + err.message
+    if (msg.includes('retry after')) {
+      let st = msg.indexOf('retry after') + 'retry after '.length
+      msg = msg.substring(st).split(' ')[0]
+      await delay(parseInt(msg))
+      result_msg = await customSendDocument(emojiMix, context)
+    } else {
+      console.log("Error", err.stack);
+      console.log("Error", err.name);
+      console.log("Error", err.message);
+    }
+  }
+  return result_msg
+}
+
 export async function emojiMix(ctx: Context) {
   if ('match' in ctx) {
     // console.log(ctx.match[0].codePointAt(0))
@@ -82,12 +112,7 @@ export async function emojiMix(ctx: Context) {
       }
 
       if (!emojiDB) {
-        let msg = await ctx.telegram.sendDocument(process.env.CHATID,
-          {
-            url: emojiMix,
-            filename: 'sticker-gen.webp'
-          },
-          { disable_notification: true })
+        let msg = await customSendDocument(emojiMix, ctx)
         console.log('creating')
         if (msg.hasOwnProperty('sticker')) {
           emojiDB = await createEmoji(emojiMix, msg['sticker'].file_id)
