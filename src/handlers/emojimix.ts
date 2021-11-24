@@ -32,7 +32,7 @@ function processDeca(decaArray) {
 export async function emojiMix(ctx: Context) {
   if ('match' in ctx) {
     // console.log(ctx.match[0].codePointAt(0))
-    let withoutspace = ctx.match[0].replace(/\s/g, '');
+    let withoutspace = ctx['match'][0].replace(/\s/g, '');
     let firstChar = withoutspace.match(regex)[0]
     let secondChar = withoutspace.slice(firstChar.length)
 
@@ -90,7 +90,7 @@ export async function emojiMix(ctx: Context) {
           { disable_notification: true })
         console.log('creating')
         if (msg.hasOwnProperty('sticker')) {
-          emojiDB = await createEmoji(emojiMix, msg.sticker.file_id)
+          emojiDB = await createEmoji(emojiMix, msg['sticker'].file_id)
 
           if (emojiDB) {
             return ctx.answerInlineQuery([{
@@ -124,8 +124,8 @@ export async function emojiMix(ctx: Context) {
 
 export async function emojiMixEmpty(ctx: Context) {
   if ('match' in ctx) {
-    console.log(ctx.match)
-    if (ctx.match.input.length == 0) {
+    console.log(ctx['match'])
+    if (ctx['match'].input.length == 0) {
       // console.log('empty')
       // for (let i = 0; i < 3; ++i) {
 
