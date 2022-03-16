@@ -18,7 +18,8 @@
     "@types/mongoose": "^5.10.18",
     "@types/node": "^15.12.1",
     "concurrently": "^6.2.0",
-    "nodemon": "^2.0.7"
+    "nodemon": "^2.0.7",
+    "emoji-regex":"^10.0.1"
   },
   "dependencies": {
     "@typegoose/typegoose": "^7.6.1",

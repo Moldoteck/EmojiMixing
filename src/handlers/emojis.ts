@@ -186,3 +186,12 @@ export const emojisCodes = [
 	[[129361], "avocado", "20201001"],
 	[[127869, 65039], 'fork and knife with plate', '20201001']
 ]
+export const knownSupportedDates = [
+	"20201001",
+	"20210218",
+	"20210521",
+	"20210831",
+	"20211115",
+	"20220110",
+	"20220203",
+  ];
