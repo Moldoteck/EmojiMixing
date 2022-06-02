@@ -194,4 +194,5 @@ export const knownSupportedDates = [
 	"20211115",
 	"20220110",
 	"20220203",
+        "20220512"
   ];
