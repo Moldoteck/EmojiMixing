@@ -1,5 +1,7 @@
 import { countUsers, createEmoji, deleteEmojis, findEmoji } from '@/models'
 import { Context } from 'telegraf'
+import { cacheObject } from './cache'
+import { emojidata } from './emojiData'
 import { knownSupportedDates } from './emojis'
 const needle = require('needle')
 
@@ -128,6 +130,40 @@ export async function emojiMix(ctx: Context) {
   if ('match' in ctx) {
     let allMatches = [...(ctx['match'].input as string).matchAll(regex)]
 
+    if (allMatches.length == 1) {
+      let firstChar = allMatches[0]
+
+      let firstdeca = [...firstChar].map((c) => c.codePointAt(0))
+      firstdeca = processDeca(firstdeca)
+
+      let firstdecastr = firstdeca.map((c) => c.toString(16)).join('-')
+      if (cacheObject[firstdecastr]) {
+        let pairs = Object.keys(cacheObject[firstdecastr])
+        pairs = pairs.map((p) =>
+          p
+            .split('-')
+            .map((c) => String.fromCodePoint(parseInt(c, 16)))
+            .join('')
+        )
+        return ctx.answerInlineQuery([
+          {
+            id: '0',
+            type: 'article',
+            title: 'Options(tap for all)',
+            description:
+              'For ' + String.fromCodePoint(...firstdeca) + ': ' + pairs.join(),
+            input_message_content: {
+              message_text:
+                'For ' +
+                String.fromCodePoint(...firstdeca) +
+                ': ' +
+                pairs.join(' '),
+            },
+          },
+        ])
+      }
+    }
+
     if (allMatches.length >= 2) {
       let firstChar = allMatches[0]
       let secondChar = allMatches[1]
@@ -138,71 +174,44 @@ export async function emojiMix(ctx: Context) {
       firstdeca = processDeca(firstdeca)
       seconddeca = processDeca(seconddeca)
 
-      let found = false
-      let emojiDB = undefined
-      let emojiMix = ''
-
-      //search in db all options
-      for (let element of knownSupportedDates) {
-        let tempFirstDeca = [firstdeca, element]
-        let tempSecondDeca = [seconddeca, element]
-
-        emojiMix = createURL(tempFirstDeca, tempSecondDeca)
-        emojiDB = await findEmoji(emojiMix)
-        if (emojiDB) {
-          found = true
-          break
+      let firstdecastr = firstdeca.map((c) => c.toString(16)).join('-')
+      let seconddecastr = seconddeca.map((c) => c.toString(16)).join('-')
+      if (
+        (cacheObject[firstdecastr] &&
+          cacheObject[firstdecastr][seconddecastr]) ||
+        (cacheObject[seconddecastr] && cacheObject[seconddecastr][firstdecastr])
+      ) {
+        let tempFirstDeca = []
+        let tempSecondDeca = []
+        if (
+          cacheObject[firstdecastr] &&
+          cacheObject[firstdecastr][seconddecastr]
+        ) {
+          tempFirstDeca = [firstdeca, cacheObject[firstdecastr][seconddecastr]]
+          tempSecondDeca = [
+            seconddeca,
+            cacheObject[firstdecastr][seconddecastr],
+          ]
+        } else {
+          tempFirstDeca = [seconddeca, cacheObject[seconddecastr][firstdecastr]]
+          tempSecondDeca = [firstdeca, cacheObject[seconddecastr][firstdecastr]]
         }
-        emojiMix = createURL(tempSecondDeca, tempFirstDeca)
-        emojiDB = await findEmoji(emojiMix)
-        if (emojiDB) {
-          found = true
-          break
-        }
-      }
 
-      if (!found) {
-        for (let element of knownSupportedDates) {
-          let tempFirstDeca = [firstdeca, element]
-          let tempSecondDeca = [seconddeca, element]
-
-          emojiMix = createURL(tempFirstDeca, tempSecondDeca)
-
-          //request with classic combination
+        let emojiMix = createURL(tempFirstDeca, tempSecondDeca)
+        let emojiDB = await findEmoji(emojiMix)
+        let found = emojiDB ? true : false
+        if (!found) {
           let res = await needle('head', emojiMix)
           if (res.statusCode != 404) {
-            found = true
-            break
-          } else {
-            emojiMix = createURL(tempSecondDeca, tempFirstDeca)
-            res = await needle('head', emojiMix)
-            if (res.statusCode != 404) {
+            let msg = await customSendDocument(emojiMix, ctx)
+            console.log('creating')
+            if (msg.hasOwnProperty('sticker')) {
+              emojiDB = await createEmoji(emojiMix, msg['sticker'].file_id)
               found = true
-              break
             }
           }
         }
-      }
-
-      if (found) {
-        if (!emojiDB) {
-          //if not in db, create entry
-          let msg = await customSendDocument(emojiMix, ctx)
-          console.log('creating')
-          if (msg.hasOwnProperty('sticker')) {
-            emojiDB = await createEmoji(emojiMix, msg['sticker'].file_id)
-
-            if (emojiDB) {
-              return ctx.answerInlineQuery([
-                {
-                  id: '0',
-                  type: 'sticker',
-                  sticker_file_id: emojiDB.tg_url,
-                },
-              ])
-            }
-          }
-        } else {
+        if (found) {
           return ctx.answerInlineQuery([
             {
               id: '0',
@@ -210,9 +219,20 @@ export async function emojiMix(ctx: Context) {
               sticker_file_id: emojiDB.tg_url,
             },
           ])
+        } else {
+          return ctx.answerInlineQuery([
+            {
+              id: '0',
+              type: 'article',
+              title: 'No luck',
+              description: 'No mixing found',
+              input_message_content: {
+                message_text: '.',
+              },
+            },
+          ])
         }
       } else {
-        //if fail, respond failed
         return ctx.answerInlineQuery([
           {
             id: '0',
