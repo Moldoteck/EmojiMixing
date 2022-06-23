@@ -156,8 +156,7 @@ export async function emojiMix(ctx: Context) {
         let goodCache = cacheObject[firstdecastr]?cacheObject[firstdecastr]:revCacheObject[firstdecastr]
         let pairs = Object.keys(goodCache)
         pairs = pairs.map((p) =>
-          p
-            .split('-')
+          p.split('-')
             .map((c) => String.fromCodePoint(parseInt(c, 16)))
             .join('')
         )
@@ -178,39 +177,7 @@ export async function emojiMix(ctx: Context) {
                 pairs.join(' '),
             },
           }
-        })
-
-
-
-        // return ctx.answerInlineQuery([
-        //   {
-        //     id: '0',
-        //     type: 'article',
-        //     title: 'Options(tap for all)',
-        //     description:
-        //       'For ' + String.fromCodePoint(...firstdeca) + ': ' + pairs.join(),
-        //     input_message_content: {
-        //       message_text:
-        //         'For ' +
-        //         String.fromCodePoint(...firstdeca) +
-        //         ': ' +
-        //         pairs.join(' '),
-        //     },
-        //   }, {
-        //     id: '1',
-        //     type: 'article',
-        //     title: 'O2ptions(tap for all)',
-        //     description:
-        //       'For ' + String.fromCodePoint(...firstdeca) + ': ' + pairs.join(),
-        //     input_message_content: {
-        //       message_text:
-        //         'For ' +
-        //         String.fromCodePoint(...firstdeca) +
-        //         ': ' +
-        //         pairs.join(' '),
-        //     },
-        //   },
-        // ])
+        }))
       }
     }
 
