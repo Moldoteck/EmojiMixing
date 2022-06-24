@@ -1,4 +1,6 @@
 node_modules
+temp_stickers1/*.png
+temp_stickers2/*.webp
 dist
 .env
 *.log
