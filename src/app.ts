@@ -26,7 +26,7 @@ bot.use(i18n.middleware(), attachI18N)
 bot.command(['help', 'start'], sendHelp)
 bot.command('language', sendLanguage)
 bot.command('count', countBotUsers)
-bot.command('count', deleteDatabase)
+bot.command('drop', deleteDatabase)
 
 bot.inlineQuery(regex, emojiMix)
 
