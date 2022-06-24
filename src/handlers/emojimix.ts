@@ -290,3 +290,9 @@ export async function countBotUsers(ctx: Context) {
     ctx.reply('Registered users ' + users).catch((e) => {})
   }
 }
+
+export async function deleteDatabase(ctx: Context) {
+  if (ctx.from.id == parseInt(process.env.ADMINID)) {
+    deleteEmojis()
+  }
+}

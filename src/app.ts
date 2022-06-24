@@ -15,7 +15,7 @@ import { i18n, attachI18N } from '@/helpers/i18n'
 import { setLanguage, sendLanguage } from '@/handlers/language'
 import { attachUser } from '@/middlewares/attachUser'
 import { attachChat } from '@/middlewares/attachChat'
-import { countBotUsers, emojiMix } from './handlers/emojimix'
+import { countBotUsers, deleteDatabase, emojiMix } from './handlers/emojimix'
 
 // Middlewares
 bot.use(ignoreOldMessageUpdates)
@@ -26,6 +26,8 @@ bot.use(i18n.middleware(), attachI18N)
 bot.command(['help', 'start'], sendHelp)
 bot.command('language', sendLanguage)
 bot.command('count', countBotUsers)
+bot.command('count', deleteDatabase)
+
 bot.inlineQuery(regex, emojiMix)
 
 // Actions
