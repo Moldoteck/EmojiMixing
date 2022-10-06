@@ -4,3 +4,5 @@ temp_stickers2/*.webp
 dist
 .env
 *.log
+revCache.json
+cache.json
