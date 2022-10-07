@@ -3,7 +3,7 @@ let emojidata = {}
 //run node src/handlers/cachegenerator.ts
 //copy generated files
 const fs = require('fs')
-generateCacheFromEmojiData()
+// generateCacheFromEmojiData()
 function generateCacheFromEmojiData(){
     let cache = {}
     let revCache = {}
